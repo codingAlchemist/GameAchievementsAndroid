@@ -54,7 +54,7 @@ dependencies {
     def coroutinesVersion = '1.7.1'
     def retrofitVersion = "2.9.0"
     def lifeCycleVersion = '2.2.0'
-    def daggerHiltVersion = '2.44'
+    def daggerHiltVersion = '2.47'
     def coilVersion = '1.2.2'
     def nav_version = "2.6.0"
     def compose_version = "2.6.1"
