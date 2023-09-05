@@ -20,6 +20,15 @@ android {
         vectorDrawables {
             useSupportLibrary true
         }
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments += [
+                        "room.schemaLocation":"$projectDir/schemas".toString(),
+                        "room.incremental":"true",
+                        "room.expandProjection":"true"
+                ]
+            }
+        }
     }
 
     buildTypes {
@@ -51,12 +60,13 @@ android {
 
 dependencies {
 
+    implementation 'androidx.compose.material:material:1.5.0'
     def coroutinesVersion = '1.7.1'
     def retrofitVersion = "2.9.0"
     def lifeCycleVersion = '2.2.0'
     def daggerHiltVersion = '2.47'
     def coilVersion = '1.2.2'
-    def nav_version = "2.6.0"
+    def nav_version = "2.7.0"
     def compose_version = "2.6.1"
     def room_version = "2.5.2"
 
@@ -91,24 +101,25 @@ dependencies {
     //for image rendering
     implementation "io.coil-kt:coil:$coilVersion"
 
-    //material design
-    implementation 'com.google.android.material:material:1.9.0'
-
     // ViewModel
     implementation "androidx.lifecycle:lifecycle-extensions:$lifeCycleVersion"
     implementation "androidx.lifecycle:lifecycle-runtime-ktx:$lifeCycleVersion"
     implementation "androidx.lifecycle:lifecycle-viewmodel-ktx:$lifeCycleVersion"
     implementation "androidx.lifecycle:lifecycle-livedata-ktx:$lifeCycleVersion"
     implementation "androidx.lifecycle:lifecycle-viewmodel-compose:$compose_version"
-    implementation "androidx.compose.runtime:runtime-livedata:1.4.3"
+    implementation "androidx.compose.runtime:runtime-livedata:1.5.0"
 
+    //Tabs
+    implementation "com.google.accompanist:accompanist-pager:0.13.0"
+    implementation "com.google.accompanist:accompanist-pager-indicators:0.13.0"
 
     // WebView
     implementation "com.google.accompanist:accompanist-webview:0.31.5-beta"
 
     // Room
     implementation "androidx.room:room-runtime:$room_version"
-    annotationProcessor "androidx.room:room-compiler:$room_version"
+    kapt "androidx.room:room-compiler:$room_version"
+    implementation 'androidx.room:room-ktx:2.5.2'
 
     testImplementation 'junit:junit:4.13.2'
     androidTestImplementation 'androidx.test.ext:junit:1.1.5'

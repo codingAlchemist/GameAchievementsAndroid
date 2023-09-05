@@ -52,12 +52,13 @@ import kotlinx.coroutines.flow.flow
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun LoginScreen(viewModel: AchievementsViewModel? = null, onSignUp: () -> Unit){
+fun LoginScreen(viewModel: AchievementsViewModel? = null, onSignUp: () -> Unit, onLogin: () -> Unit){
 
     val username = remember{ mutableStateOf(TextFieldValue()) }
     val password = remember {
         mutableStateOf(TextFieldValue())
     }
+
    val player:Player by viewModel!!._player.collectAsState()
     AppImage(
         modifier = Modifier
@@ -73,7 +74,6 @@ fun LoginScreen(viewModel: AchievementsViewModel? = null, onSignUp: () -> Unit){
         horizontalAlignment = Alignment.CenterHorizontally) {
         AchievementsAppBar()
         Spacer(modifier = Modifier.height(20.dp))
-        Text(text = player?.username!!, color = Color.White)
         Text(stringResource(R.string.username), color = colorResource(id = R.color.white))
         TextField(value = username.value, onValueChange = {username.value = it})
         Spacer(modifier = Modifier
@@ -89,13 +89,14 @@ fun LoginScreen(viewModel: AchievementsViewModel? = null, onSignUp: () -> Unit){
                 .fillMaxWidth()
                 .fillMaxHeight(), horizontalArrangement = Arrangement.SpaceEvenly) {
             Button(onClick = {
-                             viewModel!!.loginPlayer(userName = username.value.text, password = password.value.text)
-
+                viewModel!!.loginPlayer(userName = username.value.text, password = password.value.text).apply {
+                    onLogin()
+                }
             }, shape = RoundedCornerShape(10.dp), elevation = ButtonDefaults.buttonElevation(5.dp)) {
-                Text("Login")
+                Text(stringResource(R.string.login))
             }
             Button(onClick = { onSignUp() }, shape = RoundedCornerShape(10.dp), elevation = ButtonDefaults.buttonElevation(5.dp)) {
-                Text("Sign Up")
+                Text(stringResource(R.string.sign_up))
             }
         }
 
@@ -112,7 +113,7 @@ fun LoginPreview() {
     GameAchievementsTheme {
         LoginScreen(onSignUp = {
 
-        })
+        }, onLogin = {})
     }
 }
 

@@ -1,6 +1,7 @@
 package com.example.gameachievements.di
 
 import android.content.Context
+import com.example.gameachievements.AchievementsApplication
 import com.example.gameachievements.api.AchievementsService
 import dagger.Module
 import dagger.Provides

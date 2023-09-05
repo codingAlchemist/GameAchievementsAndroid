@@ -1,11 +1,13 @@
 package com.example.gameachievements.di
 
+import android.content.Context
 import com.example.gameachievements.api.AchievementsService
 import com.example.gameachievements.api.BaseApiResponse
 import com.example.gameachievements.api.NetworkResult
 import com.example.gameachievements.models.LoginModel
 import com.example.mtgcommanderachievements.models.Achievement
 import com.example.gameachievements.models.Player
+import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
@@ -18,6 +20,12 @@ class NetworkRepository @Inject constructor(private val achievementsService: Ach
     suspend fun getAchievements(): Flow<NetworkResult<List<Achievement>>> {
         return  flow {
             emit(safeApiCall { achievementsService.getAllAchievements() })
+        }.flowOn(Dispatchers.IO)
+    }
+
+    suspend fun getAchievementById(id: Int): Flow<NetworkResult<Achievement>> {
+        return flow {
+            emit( safeApiCall { achievementsService.getAchievementById(id)})
         }.flowOn(Dispatchers.IO)
     }
 
@@ -45,4 +53,6 @@ class NetworkRepository @Inject constructor(private val achievementsService: Ach
             })
         }
     }
+
+
 }
