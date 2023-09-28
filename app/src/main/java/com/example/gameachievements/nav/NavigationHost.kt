@@ -1,24 +1,20 @@
 package com.example.gameachievements.nav
 
-import androidx.compose.animation.ExitTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideIn
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.navigation.NavController
-import androidx.navigation.NavGraph
-import androidx.navigation.NavHost
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import androidx.navigation.compose.rememberNavController
 import com.example.gameachievements.models.Player
 import com.example.gameachievements.viewmodels.AchievementsViewModel
+import com.example.gameachievements.views.CreateGameScreen
 import com.example.gameachievements.views.EventScreen
+import com.example.gameachievements.views.GameView
 import com.example.gameachievements.views.LoginScreen
 import com.example.gameachievements.views.MainTabView
 import com.example.gameachievements.views.SignUpView
@@ -32,7 +28,7 @@ fun NavGraph(navController: NavHostController, viewModel: AchievementsViewModel?
     val achievements: List<Achievement> by viewModel!!._achievements.collectAsState()
     NavHost(
         navController = navController,
-        startDestination = "login") {
+        startDestination = if (viewModel!!.getPlayer() != null) "login" else "maintabview") {
         composable("login", enterTransition = {
             fadeIn(animationSpec = tween(2000))
         }, exitTransition = {
@@ -48,7 +44,7 @@ fun NavGraph(navController: NavHostController, viewModel: AchievementsViewModel?
                     if (!player.username.isNullOrBlank()) {
 
                         navController.navigate(NavRoute.MainTabView.path)
-                        viewModel!!.getAllAchievements()
+                        viewModel!!.getAllAchievementsFromNetwork()
                     }
                     if (!achievements.isNullOrEmpty()) {
                         viewModel!!.saveAllAchievements(achievements)
@@ -67,7 +63,14 @@ fun NavGraph(navController: NavHostController, viewModel: AchievementsViewModel?
             }
         }
         composable("maintabview"){
-            MainTabView()
+            MainTabView(navHostController = navController)
+        }
+        composable("gameView") {
+            GameView(viewModel = viewModel)
+        }
+        composable("createGameScreen") {
+            CreateGameScreen {
+            }
         }
     }
 }
@@ -78,6 +81,9 @@ sealed class NavRoute(val path: String) {
 
     object Event: NavRoute("event")
 
+    object CreateGameScreen: NavRoute("createGameScreen")
+
+    object  GameView: NavRoute("gameView")
     object MainTabView: NavRoute("maintabview")
     fun withArgs(vararg args: String): String {
         return  buildString {

@@ -29,4 +29,12 @@ class DatabaseRepository @Inject constructor(private val playerDao: PlayerDao,
         return achievementDao.insertAchievment(achievement)
     }
 
+    suspend fun deleteAchievement(achievement: Achievement) {
+        achievementDao.deleteAchievement(achievement)
+    }
+
+    suspend fun deleteAllAchievements() {
+        achievementDao.deleteAll()
+    }
+
 }

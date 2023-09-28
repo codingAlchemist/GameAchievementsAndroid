@@ -10,7 +10,6 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -23,7 +22,7 @@ import com.example.gameachievements.R
 import com.example.gameachievements.ui.theme.GameAchievementsTheme
 
 @Composable
-fun GameScreen(onSubmit: ()->Unit) {
+fun CreateGameScreen(onSubmit: ()->Unit) {
     AppImage(
         modifier = Modifier
             .fillMaxWidth()
@@ -53,7 +52,7 @@ fun GameScreen(onSubmit: ()->Unit) {
 @Composable
 fun GameScreenPreview() {
     GameAchievementsTheme {
-        GameScreen(onSubmit = {
+        CreateGameScreen(onSubmit = {
 
         })
     }

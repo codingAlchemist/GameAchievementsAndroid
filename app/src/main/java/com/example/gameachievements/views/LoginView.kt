@@ -129,7 +129,6 @@ fun AppImage(
             setImageResource(resource)
             setColorFilter(colorFilter?.asAndroidColorFilter())
         }
-
     },
         update = {
             it.setImageResource(resource)

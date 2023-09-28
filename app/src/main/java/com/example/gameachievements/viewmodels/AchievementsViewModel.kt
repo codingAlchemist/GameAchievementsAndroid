@@ -1,30 +1,16 @@
 package com.example.gameachievements.viewmodels
 
-import android.app.Application
-import android.content.Context
 import android.util.Log
-import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.LiveData
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.room.Room
-import com.example.gameachievements.AchievementsApplication
-import com.example.gameachievements.api.NetworkResult
-import com.example.gameachievements.database.AchievementsDatabase
 import com.example.gameachievements.di.DatabaseRepository
 import com.example.gameachievements.di.NetworkRepository
 import com.example.gameachievements.models.LoginModel
 import com.example.mtgcommanderachievements.models.Achievement
 import com.example.gameachievements.models.Player
 import dagger.hilt.android.lifecycle.HiltViewModel
-import dagger.hilt.android.qualifiers.ApplicationContext
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
-import kotlinx.coroutines.flow.first
-import kotlinx.coroutines.flow.forEach
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 
@@ -72,20 +58,42 @@ class AchievementsViewModel @Inject constructor(private val repository: NetworkR
             player.emit(result.data!!)
         }
     }
-    fun getAllAchievements() = viewModelScope.launch {
+    fun getAllAchievementsFromNetwork() = viewModelScope.launch {
         repository.getAchievements().collect { result ->
             result.data?.let {
                 achievements.emit(it)
             }
         }
     }
-    
+
     fun saveAllAchievements(achievementsIn: List<Achievement>) = viewModelScope.launch {
         achievementsIn.forEach {
             databaseRepo.insertAchievement(it)
         }
     }
+
+    fun getAllAchievements() = viewModelScope.launch {
+        if (databaseRepo.getAllAchievements().isNotEmpty()) {
+            achievements.emit(databaseRepo.getAllAchievements())
+        } else {
+            getAllAchievementsFromNetwork()
+        }
+    }
+
+    fun refreshAchievements() = viewModelScope.launch {
+        if (databaseRepo.getAllAchievements().isNotEmpty()) {
+            databaseRepo.deleteAllAchievements()
+            getAllAchievementsFromNetwork()
+            if (achievements.value.isNotEmpty()) {
+                saveAllAchievements(achievementsIn = achievements.value)
+            }
+        }
+    }
     fun getPlayer(): Player? {
-        return player.value
+        var player: Player? = null
+        viewModelScope.launch {
+            player = databaseRepo.getPlayers().first()
+        }
+        return player
     }
 }

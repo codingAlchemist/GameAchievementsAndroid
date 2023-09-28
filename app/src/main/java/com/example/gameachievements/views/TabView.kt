@@ -30,6 +30,8 @@ import androidx.compose.ui.unit.ExperimentalUnitApi
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHost
+import androidx.navigation.NavHostController
 import com.example.gameachievements.R
 import com.example.gameachievements.nav.NavRoute
 import com.example.gameachievements.ui.theme.GameAchievementsTheme
@@ -45,7 +47,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalUnitApi::class)
 @ExperimentalPagerApi
 @Composable
-fun MainTabView() {
+fun MainTabView(navHostController: NavHostController? = null) {
 
     // on below line we are creating variable for pager state.
     val pagerState = rememberPagerState(pageCount = 3)
@@ -90,7 +92,7 @@ fun MainTabView() {
         Tabs(pagerState = pagerState)
         // on below line we are calling tabs content
         // for displaying our page for each tab layout
-        TabsContent(pagerState = pagerState)
+        TabsContent(pagerState = pagerState, navHostController!!)
     }
 }
 
@@ -179,7 +181,7 @@ fun Tabs(pagerState: PagerState) {
 // in which we will be displaying the individual page of our tab .
 @ExperimentalPagerApi
 @Composable
-fun TabsContent(pagerState: PagerState) {
+fun TabsContent(pagerState: PagerState, navHostController: NavHostController) {
     // on below line we are creating
     // horizontal pager for our tab layout.
     HorizontalPager(state = pagerState) {
@@ -189,8 +191,8 @@ fun TabsContent(pagerState: PagerState) {
         when (page) {
             // on below line we are calling tab content screen
             // and specifying data as Home Screen.
-            0 -> GameScreen {
-
+            0 -> CreateGameScreen {
+                navHostController.navigate(NavRoute.GameView.path)
             }
             // on below line we are calling tab content screen
             // and specifying data as Shopping Screen.
