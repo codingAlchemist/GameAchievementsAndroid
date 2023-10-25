@@ -39,6 +39,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Devices
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import com.example.gameachievements.ui.theme.GameAchievementsTheme
 import com.example.gameachievements.viewmodels.AchievementsViewModel
 import com.example.mtgcommanderachievements.models.Achievement
@@ -59,9 +60,7 @@ enum class CardFace(val angle: Float) {
 @SuppressLint("StateFlowValueCalledInComposition")
 @Composable
 fun GameView(viewModel: AchievementsViewModel? = null) {
-
     Column(
-
         modifier = Modifier
             .fillMaxSize()
             .verticalScroll(rememberScrollState())
@@ -71,7 +70,7 @@ fun GameView(viewModel: AchievementsViewModel? = null) {
 
         viewModel?._achievements?.value?.let {
             for (i in 0..2){
-                GameCardView(achievement = it.get(i))
+                GameCardView(achievement = it.get(i), viewModel = viewModel)
             }
         }
 
@@ -80,7 +79,7 @@ fun GameView(viewModel: AchievementsViewModel? = null) {
 }
 
 @Composable
-fun GameCardView(achievement: Achievement) {
+fun GameCardView(achievement: Achievement, viewModel: AchievementsViewModel? = null) {
     var cardFace by remember {
         mutableStateOf(CardFace.Front)
     }
@@ -104,11 +103,14 @@ fun GameCardView(achievement: Achievement) {
             RewardCardView(modifier = Modifier
                 .fillMaxWidth()
                 .padding(5.dp)
-                .height(height = 220.dp)
+                .height(height = 300.dp)
                 .graphicsLayer {
                     rotationY = 180f
                 }, achievement,
                 onClick = {
+                    viewModel?.let {
+                        it.completeAchievement(achievement = achievement)
+                    }
                 }
             )
         }
@@ -120,6 +122,7 @@ fun AchievementCardView(cardFace: CardFace,
                         achievement: Achievement,
                         onClick: (CardFace) -> Unit) {
     val viewPadding = 5.dp
+    val textSize = 18.sp
     Spacer(modifier = Modifier.height(10.dp))
     OutlinedCard(
         colors = CardDefaults.cardColors(
@@ -128,32 +131,37 @@ fun AchievementCardView(cardFace: CardFace,
         modifier = Modifier
             .fillMaxWidth()
             .padding(viewPadding)
-            .height(height = 220.dp)) {
-        Column(modifier = Modifier.verticalScroll(rememberScrollState())) {
+            .height(height = 300.dp)) {
+        Column {
             Text(
                 text = "Points: ${achievement.points}",
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(viewPadding),
+                fontSize = textSize,
                 textAlign = TextAlign.End
             )
             Text(
                 text = "Name",
                 modifier = Modifier.padding(viewPadding),
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                fontSize = textSize,
             )
             Text(
                 text = achievement.name,
-                modifier = Modifier.padding(viewPadding)
+                modifier = Modifier.padding(viewPadding),
+                fontSize = textSize,
             )
             Text(
                 text = "Description",
                 modifier = Modifier.padding(viewPadding),
-                fontWeight = FontWeight.Bold
+                fontWeight = FontWeight.Bold,
+                fontSize = textSize,
             )
             Text(
                 text = achievement.desc,
-                modifier = Modifier.padding(viewPadding)
+                modifier = Modifier.padding(viewPadding),
+                fontSize = textSize,
             )
             Spacer(modifier = Modifier.height(2.dp))
             Row(modifier = Modifier
@@ -172,14 +180,29 @@ fun AchievementCardView(cardFace: CardFace,
 }
 
 @Composable
-fun RewardCardView(modifier: Modifier, achievement: Achievement, onClick: (CardFace) -> Unit) {
+fun RewardCardView(modifier: Modifier, achievement: Achievement, onClick: () -> Unit) {
     val viewPadding = 5.dp
     OutlinedCard(
         colors = CardDefaults.cardColors(
-        containerColor = Color.Blue
+        containerColor = Color.White
     ), border = BorderStroke(1.dp, Color.Black),
         modifier = modifier
     ) {
+        Column(
+            modifier = Modifier.fillMaxSize(),
+            verticalArrangement = Arrangement.Center,
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            if (!achievement.reward.isNullOrEmpty()){
+                Text(text = achievement.reward, fontWeight = FontWeight.Bold, fontSize = 13.sp)
+            }
+            Spacer(modifier = Modifier.height(20.dp))
+            Button(onClick = {
+                onClick()
+            }) {
+                Text("Use Reward")
+            }
+        }
 
     }
 }

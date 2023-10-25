@@ -23,6 +23,7 @@ interface AchievementDao {
 
     @Query("DELETE FROM achievement")
     fun deleteAll()
+
     @Query("UPDATE achievement SET completed = :completed where achievement.id == :id")
     fun setAchievementCompleted(completed: Boolean, id: Int)
 }

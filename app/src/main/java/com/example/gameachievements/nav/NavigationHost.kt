@@ -5,8 +5,11 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
@@ -20,15 +23,24 @@ import com.example.gameachievements.views.MainTabView
 import com.example.gameachievements.views.SignUpView
 import com.example.mtgcommanderachievements.models.Achievement
 import com.google.accompanist.pager.ExperimentalPagerApi
+import androidx.compose.runtime.setValue // only if using var
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalPagerApi::class)
 @Composable
 fun NavGraph(navController: NavHostController, viewModel: AchievementsViewModel? = null) {
-    val player: Player by viewModel!!._player.collectAsState()
     val achievements: List<Achievement> by viewModel!!._achievements.collectAsState()
+    var startDestination by remember { mutableStateOf(NavRoute.Login.path ) }
+    LaunchedEffect(key1 = "login"){
+        if (viewModel!!.getLoggedInPlayer().id > 0) {
+            startDestination = NavRoute.MainTabView.path
+        }
+    }
+
     NavHost(
         navController = navController,
-        startDestination = if (viewModel!!.getPlayer() != null) "login" else "maintabview") {
+        startDestination = startDestination) {
         composable("login", enterTransition = {
             fadeIn(animationSpec = tween(2000))
         }, exitTransition = {
@@ -41,13 +53,15 @@ fun NavGraph(navController: NavHostController, viewModel: AchievementsViewModel?
                 onSignUp = {
                     navController.navigate(NavRoute.SignUp.path)
             }, onLogin = {
-                    if (!player.username.isNullOrBlank()) {
-
-                        navController.navigate(NavRoute.MainTabView.path)
-                        viewModel!!.getAllAchievementsFromNetwork()
+                    GlobalScope.launch {
+                        if (viewModel!!.getLoggedInPlayer() != null) {
+                            navController.navigate(NavRoute.MainTabView.path)
+                            viewModel.getAllAchievementsFromNetwork()
+                        }
                     }
+
                     if (!achievements.isNullOrEmpty()) {
-                        viewModel!!.saveAllAchievements(achievements)
+                        viewModel?.saveAllAchievements(achievements)
                     }
                 })
         }
@@ -59,7 +73,7 @@ fun NavGraph(navController: NavHostController, viewModel: AchievementsViewModel?
         }
         composable("event") {
             EventScreen {
-
+                
             }
         }
         composable("maintabview"){

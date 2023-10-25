@@ -7,7 +7,7 @@ import com.example.gameachievements.dao.PlayerDao
 import com.example.gameachievements.models.Player
 import com.example.mtgcommanderachievements.models.Achievement
 
-@Database(entities = [Player::class, Achievement::class], version = 2)
+@Database(entities = [Player::class, Achievement::class], version = 4)
 abstract class AchievementsDatabase: RoomDatabase() {
     abstract fun playerDao(): PlayerDao
     abstract fun achievementDao(): AchievementDao

@@ -11,30 +11,47 @@ import kotlinx.coroutines.flow.Flow
 import java.io.LineNumberReader
 import javax.inject.Inject
 
+interface DatabaseRepositoryInterface {
+    suspend fun getPlayers(): List<Player>
+    suspend fun insertPlayer(player: Player): Long
+    suspend fun getAllAchievements() : List<Achievement>
+    suspend fun insertAchievement(achievement: Achievement): Long
+    suspend fun deleteAchievement(achievement: Achievement)
+    suspend fun deleteAllAchievements()
+    suspend fun getAchievement(achievement: Achievement)
+    suspend fun completeAchievement(achievement: Achievement)
+}
 class DatabaseRepository @Inject constructor(private val playerDao: PlayerDao,
-                                             private val achievementDao: AchievementDao) {
-    suspend fun getPlayers(): List<Player> {
+                                             private val achievementDao: AchievementDao): DatabaseRepositoryInterface {
+    override suspend fun getPlayers(): List<Player> {
         return playerDao.getAll()
     }
 
-    suspend fun insertPlayer(player: Player): Long {
+    override suspend fun insertPlayer(player: Player): Long {
         return playerDao.insertPlayer(player = player)
     }
 
-    suspend fun getAllAchievements() : List<Achievement> {
+    override suspend fun getAllAchievements() : List<Achievement> {
         return achievementDao.getAll()
     }
 
-    suspend fun insertAchievement(achievement: Achievement): Long {
+    override suspend fun insertAchievement(achievement: Achievement): Long {
         return achievementDao.insertAchievment(achievement)
     }
 
-    suspend fun deleteAchievement(achievement: Achievement) {
+    override suspend fun deleteAchievement(achievement: Achievement) {
         achievementDao.deleteAchievement(achievement)
     }
 
-    suspend fun deleteAllAchievements() {
+    override suspend fun deleteAllAchievements() {
         achievementDao.deleteAll()
     }
 
+    override suspend fun getAchievement(achievement: Achievement) {
+        achievementDao.getAchievementById(achievement.id)
+    }
+
+    override suspend fun completeAchievement(achievement: Achievement) {
+        achievementDao.setAchievementCompleted(true, achievement.id)
+    }
 }

@@ -9,6 +9,13 @@ data class Achievement(@PrimaryKey val id:Int,
                        @ColumnInfo("name") val name:String,
                        @ColumnInfo("desc") val desc: String,
                        @ColumnInfo("points") val points: Int,
-                       @ColumnInfo("completed") val completed: Boolean
+                       @ColumnInfo("completed") val completed: Boolean,
+                       @ColumnInfo("reward") val reward: String?
     ) {
 }
+
+data class CompletedAchievementResponse(val id: Int,
+                                        val playerId: Int,
+                                        val achievementId: Int,
+                                        val completed: Boolean)
+data class CompleteAchievementRequest(val player_id: Int)

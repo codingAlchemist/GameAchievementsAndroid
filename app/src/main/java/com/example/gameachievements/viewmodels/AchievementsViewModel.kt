@@ -8,14 +8,29 @@ import com.example.gameachievements.di.NetworkRepository
 import com.example.gameachievements.models.LoginModel
 import com.example.mtgcommanderachievements.models.Achievement
 import com.example.gameachievements.models.Player
+import com.example.mtgcommanderachievements.models.CompleteAchievementRequest
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import java.util.logging.Logger
 import javax.inject.Inject
-
+interface AchievementsViewModelInterface {
+    fun loginPlayer(userName: String, password: String)
+    fun signUpPlayer(playerIn: Player)
+    fun getAllAchievementsFromNetwork()
+    fun saveAllAchievements(achievementsIn: List<Achievement>)
+    fun getAllAchievements()
+    fun refreshAchievements()
+    fun completeAchievement(achievement: Achievement): Job
+}
 @HiltViewModel
-class AchievementsViewModel @Inject constructor(private val repository: NetworkRepository, private val databaseRepo: DatabaseRepository): ViewModel() {
+class AchievementsViewModel @Inject constructor(private val repository: NetworkRepository, private val databaseRepo: DatabaseRepository): ViewModel(),AchievementsViewModelInterface {
     private val player: MutableStateFlow<Player> = MutableStateFlow(Player(
         0,
         "",
@@ -32,68 +47,106 @@ class AchievementsViewModel @Inject constructor(private val repository: NetworkR
     val _player: StateFlow<Player> = player
 
     private val achievements: MutableStateFlow<List<Achievement>> = MutableStateFlow(
-        listOf(Achievement(0, "", "",0,false))
+        listOf(Achievement(0, "", "",0,false, reward = ""))
     )
     val _achievements:StateFlow<List<Achievement>> = achievements
 
-    fun loginPlayer(userName: String, password: String) = viewModelScope.launch{
-        repository.loginPlayer(LoginModel(username = userName, password = password)).collect { result ->
-            viewModelScope.launch {
-                result.data.let {
-                    val result = databaseRepo.insertPlayer(player = it!!)
-                    Log.d("","")
-                }
-                databaseRepo.getPlayers().let {
-                    Log.d("","${it.count()}")
+    override fun loginPlayer(userName: String, password: String) {
+        viewModelScope.launch {
+            repository.loginPlayer(LoginModel(username = userName, password = password)).collect { result ->
+                viewModelScope.launch {
+                    result.data.let {playerData ->
+                        playerData?.let {
+                            val result = databaseRepo.insertPlayer(player = it!!)
+                            Log.d("","")
+                        }
+                        databaseRepo.getPlayers().let {
+                            Log.d("","${it.count()}")
+                        }
+                        player.emit(playerData!!)
+                    }
                 }
 
+            }
+        }
+
+    }
+
+    override fun signUpPlayer(playerIn: Player)  {
+        viewModelScope.launch {
+            repository.signUpPlayer(playerIn).collect { result ->
                 player.emit(result.data!!)
             }
-
         }
+
     }
 
-    fun signUpPlayer(playerIn: Player) = viewModelScope.launch {
-        repository.signUpPlayer(playerIn).collect { result ->
-            player.emit(result.data!!)
-        }
-    }
-    fun getAllAchievementsFromNetwork() = viewModelScope.launch {
-        repository.getAchievements().collect { result ->
-            result.data?.let {
-                achievements.emit(it)
+    suspend fun getLoggedInPlayer(): Player = withContext(Dispatchers.IO){
+        //var player: Player? = null
+        databaseRepo.getPlayers().let {
+            if (it.isNotEmpty()){
+                it.first().let { result ->
+                    player.value = result
+                }
             }
         }
+        return@withContext player.value
     }
 
-    fun saveAllAchievements(achievementsIn: List<Achievement>) = viewModelScope.launch {
-        achievementsIn.forEach {
-            databaseRepo.insertAchievement(it)
-        }
-    }
-
-    fun getAllAchievements() = viewModelScope.launch {
-        if (databaseRepo.getAllAchievements().isNotEmpty()) {
-            achievements.emit(databaseRepo.getAllAchievements())
-        } else {
-            getAllAchievementsFromNetwork()
-        }
-    }
-
-    fun refreshAchievements() = viewModelScope.launch {
-        if (databaseRepo.getAllAchievements().isNotEmpty()) {
-            databaseRepo.deleteAllAchievements()
-            getAllAchievementsFromNetwork()
-            if (achievements.value.isNotEmpty()) {
-                saveAllAchievements(achievementsIn = achievements.value)
-            }
-        }
-    }
-    fun getPlayer(): Player? {
-        var player: Player? = null
+    override fun getAllAchievementsFromNetwork() {
         viewModelScope.launch {
-            player = databaseRepo.getPlayers().first()
+            repository.getAchievements().collect { result ->
+                result.data?.let {
+                    achievements.emit(it)
+                }
+            }
         }
-        return player
+    }
+
+    override fun saveAllAchievements(achievementsIn: List<Achievement>) {
+        viewModelScope.launch {
+            achievementsIn.forEach {
+                databaseRepo.insertAchievement(it)
+            }
+        }
+    }
+
+    override fun getAllAchievements()  {
+        viewModelScope.launch {
+            if (databaseRepo.getAllAchievements().isNotEmpty()) {
+                achievements.emit(databaseRepo.getAllAchievements())
+            } else {
+                getAllAchievementsFromNetwork()
+            }
+        }
+    }
+
+    override fun refreshAchievements()  {
+        viewModelScope.launch {
+            if (databaseRepo.getAllAchievements().isNotEmpty()) {
+                databaseRepo.deleteAllAchievements()
+                getAllAchievementsFromNetwork()
+                if (achievements.value.isNotEmpty()) {
+                    saveAllAchievements(achievementsIn = achievements.value)
+                }
+            }
+        }
+
+    }
+
+    override fun completeAchievement(achievement: Achievement):Job = viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
+            async {
+                databaseRepo.completeAchievement(achievement = achievement)
+                databaseRepo.getPlayers().let {
+                    if (it.isNotEmpty()){
+                        val playerAchievementRequest = CompleteAchievementRequest(player_id = it.first().id)
+                        repository.completeAchievement(achievement = achievement, playerRequest = playerAchievementRequest).collect { result ->
+                            Log.d("TAG", "completeAchievement: ")
+                        }
+                    }
+                }
+            }.await()
+        }
     }
 }
