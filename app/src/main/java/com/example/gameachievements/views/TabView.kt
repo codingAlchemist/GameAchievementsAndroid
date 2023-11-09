@@ -35,6 +35,7 @@ import androidx.navigation.NavHostController
 import com.example.gameachievements.R
 import com.example.gameachievements.nav.NavRoute
 import com.example.gameachievements.ui.theme.GameAchievementsTheme
+import com.example.gameachievements.viewmodels.AchievementsViewModel
 import com.google.accompanist.pager.ExperimentalPagerApi
 import com.google.accompanist.pager.HorizontalPager
 import com.google.accompanist.pager.PagerState
@@ -47,7 +48,7 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalUnitApi::class)
 @ExperimentalPagerApi
 @Composable
-fun MainTabView(navHostController: NavHostController? = null) {
+fun MainTabView(navHostController: NavHostController? = null, achievementsViewModel: AchievementsViewModel? = null) {
 
     // on below line we are creating variable for pager state.
     val pagerState = rememberPagerState(pageCount = 3)
@@ -92,7 +93,7 @@ fun MainTabView(navHostController: NavHostController? = null) {
         Tabs(pagerState = pagerState)
         // on below line we are calling tabs content
         // for displaying our page for each tab layout
-        TabsContent(pagerState = pagerState, navHostController!!)
+        TabsContent(pagerState = pagerState, navHostController!!, achievementsViewModel!!)
     }
 }
 
@@ -181,7 +182,7 @@ fun Tabs(pagerState: PagerState) {
 // in which we will be displaying the individual page of our tab .
 @ExperimentalPagerApi
 @Composable
-fun TabsContent(pagerState: PagerState, navHostController: NavHostController) {
+fun TabsContent(pagerState: PagerState, navHostController: NavHostController, achievementsViewModel: AchievementsViewModel) {
     // on below line we are creating
     // horizontal pager for our tab layout.
     HorizontalPager(state = pagerState) {
@@ -191,9 +192,7 @@ fun TabsContent(pagerState: PagerState, navHostController: NavHostController) {
         when (page) {
             // on below line we are calling tab content screen
             // and specifying data as Home Screen.
-            0 -> CreateGameScreen {
-                navHostController.navigate(NavRoute.GameView.path)
-            }
+            0 -> CreateGameScreen(achievementsViewModel)
             // on below line we are calling tab content screen
             // and specifying data as Shopping Screen.
             1 -> EventScreen {

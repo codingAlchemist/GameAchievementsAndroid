@@ -1,10 +1,13 @@
 package com.example.gameachievements.api
 
+import com.example.gameachievements.api.requests.CompleteAchievementRequest
+import com.example.gameachievements.api.requests.GameRequest
+import com.example.gameachievements.api.responses.CompletedAchievementResponse
+import com.example.gameachievements.models.Game
 import com.example.gameachievements.models.LoginModel
 import com.example.mtgcommanderachievements.models.Achievement
 import com.example.gameachievements.models.Player
-import com.example.mtgcommanderachievements.models.CompleteAchievementRequest
-import com.example.mtgcommanderachievements.models.CompletedAchievementResponse
+import com.example.gameachievements.models.PushToken
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -31,5 +34,13 @@ interface AchievementsService {
     @POST("players/create")
     suspend fun createPlayer(@Body player: Player): Response<Player>
 
+    //region Games
+    @POST("games/create")
+    suspend fun createGame(@Body gameRequest: GameRequest): Response<Game>
+    //endregion
+
+    //region Push Notifications
+    suspend fun sendFCMToken(@Body pushToken: PushToken):Response<PushToken>
+    //endregion
 
 }

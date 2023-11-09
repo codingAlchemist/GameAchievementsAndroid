@@ -24,6 +24,7 @@ import com.example.gameachievements.views.SignUpView
 import com.example.mtgcommanderachievements.models.Achievement
 import com.google.accompanist.pager.ExperimentalPagerApi
 import androidx.compose.runtime.setValue // only if using var
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 
@@ -53,7 +54,7 @@ fun NavGraph(navController: NavHostController, viewModel: AchievementsViewModel?
                 onSignUp = {
                     navController.navigate(NavRoute.SignUp.path)
             }, onLogin = {
-                    GlobalScope.launch {
+                    GlobalScope.launch(Dispatchers.Main) {
                         if (viewModel!!.getLoggedInPlayer() != null) {
                             navController.navigate(NavRoute.MainTabView.path)
                             viewModel.getAllAchievementsFromNetwork()
@@ -73,18 +74,17 @@ fun NavGraph(navController: NavHostController, viewModel: AchievementsViewModel?
         }
         composable("event") {
             EventScreen {
-                
+
             }
         }
         composable("maintabview"){
-            MainTabView(navHostController = navController)
+            MainTabView(navHostController = navController, achievementsViewModel = viewModel)
         }
         composable("gameView") {
             GameView(viewModel = viewModel)
         }
         composable("createGameScreen") {
-            CreateGameScreen {
-            }
+            CreateGameScreen()
         }
     }
 }

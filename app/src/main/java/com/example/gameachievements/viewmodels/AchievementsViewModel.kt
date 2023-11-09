@@ -3,12 +3,15 @@ package com.example.gameachievements.viewmodels
 import android.util.Log
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.example.gameachievements.api.requests.CompleteAchievementRequest
+import com.example.gameachievements.api.requests.GameRequest
 import com.example.gameachievements.di.DatabaseRepository
 import com.example.gameachievements.di.NetworkRepository
+import com.example.gameachievements.models.Game
 import com.example.gameachievements.models.LoginModel
 import com.example.mtgcommanderachievements.models.Achievement
 import com.example.gameachievements.models.Player
-import com.example.mtgcommanderachievements.models.CompleteAchievementRequest
+import com.example.gameachievements.models.PushToken
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -18,7 +21,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.logging.Logger
+import java.util.Date
 import javax.inject.Inject
 interface AchievementsViewModelInterface {
     fun loginPlayer(userName: String, password: String)
@@ -28,6 +31,8 @@ interface AchievementsViewModelInterface {
     fun getAllAchievements()
     fun refreshAchievements()
     fun completeAchievement(achievement: Achievement): Job
+    fun createGame(gameRequest: GameRequest)
+    fun saveFCM(pushToken: PushToken)
 }
 @HiltViewModel
 class AchievementsViewModel @Inject constructor(private val repository: NetworkRepository, private val databaseRepo: DatabaseRepository): ViewModel(),AchievementsViewModelInterface {
@@ -45,6 +50,17 @@ class AchievementsViewModel @Inject constructor(private val repository: NetworkR
         false
     ))
     val _player: StateFlow<Player> = player
+
+    private val game: MutableStateFlow<Game> = MutableStateFlow(Game(
+        0,
+        0,
+        0,
+        "",
+        Date(),
+        Date(),
+        Date(),
+        "" ))
+    val _game:StateFlow<Game> = game
 
     private val achievements: MutableStateFlow<List<Achievement>> = MutableStateFlow(
         listOf(Achievement(0, "", "",0,false, reward = ""))
@@ -149,4 +165,32 @@ class AchievementsViewModel @Inject constructor(private val repository: NetworkR
             }.await()
         }
     }
+
+    override fun createGame(gameRequest: GameRequest) {
+        viewModelScope.launch(Dispatchers.IO) {
+            async {
+                repository.createGame(gameRequest).collect {result ->
+                    Log.d("", "")
+                    result.data?.let {
+                        game.emit(it)
+                    }
+                }
+            }.await()
+        }
+    }
+
+    override fun saveFCM(pushToken: PushToken) {
+        viewModelScope.launch(Dispatchers.IO) {
+            async {
+                repository.sendFCMToken(pushToken = pushToken).collect{ result ->
+                    result.data?.let {
+                        Log.d("","${it.token}")
+                    }
+                }
+            }
+        }
+    }
+
+
+
 }

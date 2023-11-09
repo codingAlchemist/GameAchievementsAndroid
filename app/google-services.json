@@ -1,0 +1,39 @@
+{
+  "project_info": {
+    "project_number": "631251765486",
+    "project_id": "gameachievements-7d6e1",
+    "storage_bucket": "gameachievements-7d6e1.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:631251765486:android:2b393db417f4e471800bff",
+        "android_client_info": {
+          "package_name": "com.example.gameachievements"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "631251765486-fk1v5lmooadu8qksruem0kchnuedn04h.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyA3zvNr-rKG23rC6UGdFEh5F1bj88kkpnE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "631251765486-fk1v5lmooadu8qksruem0kchnuedn04h.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
