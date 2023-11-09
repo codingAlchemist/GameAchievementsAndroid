@@ -40,7 +40,8 @@ interface AchievementsService {
     //endregion
 
     //region Push Notifications
-    suspend fun sendFCMToken(@Body pushToken: PushToken):Response<PushToken>
+    @POST("push/register/fcm")
+    suspend fun sendFCMToken(@Body pushToken: PushToken): Response<PushToken>
     //endregion
 
 }

@@ -23,6 +23,7 @@ import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
 import androidx.navigation.compose.rememberNavController
+import com.example.gameachievements.models.PushToken
 import com.example.gameachievements.nav.NavGraph
 import com.example.gameachievements.viewmodels.AchievementsViewModel
 import com.google.android.gms.tasks.OnCompleteListener
@@ -76,6 +77,7 @@ class MainActivity : ComponentActivity() {
             // Log and toast
             val msg = "Token $token"
             Log.d("TAG", msg)
+            viewModel.saveFCM(PushToken(0,token,""))
             Toast.makeText(baseContext, msg, Toast.LENGTH_SHORT).show()
         })
     }

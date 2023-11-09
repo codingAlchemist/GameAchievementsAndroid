@@ -66,7 +66,6 @@ class AchievementsViewModel @Inject constructor(private val repository: NetworkR
         listOf(Achievement(0, "", "",0,false, reward = ""))
     )
     val _achievements:StateFlow<List<Achievement>> = achievements
-
     override fun loginPlayer(userName: String, password: String) {
         viewModelScope.launch {
             repository.loginPlayer(LoginModel(username = userName, password = password)).collect { result ->
@@ -184,7 +183,8 @@ class AchievementsViewModel @Inject constructor(private val repository: NetworkR
             async {
                 repository.sendFCMToken(pushToken = pushToken).collect{ result ->
                     result.data?.let {
-                        Log.d("","${it.token}")
+                        Log.d("","${it.fcm}")
+                        databaseRepo.savePushToken(pushToken = pushToken)
                     }
                 }
             }

@@ -2,7 +2,9 @@ package com.example.gameachievements.di
 
 import com.example.gameachievements.dao.AchievementDao
 import com.example.gameachievements.dao.PlayerDao
+import com.example.gameachievements.dao.PushTokenDao
 import com.example.gameachievements.models.Player
+import com.example.gameachievements.models.PushToken
 import com.example.mtgcommanderachievements.models.Achievement
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flow
@@ -20,9 +22,14 @@ interface DatabaseRepositoryInterface {
     suspend fun deleteAllAchievements()
     suspend fun getAchievement(achievement: Achievement)
     suspend fun completeAchievement(achievement: Achievement)
+    suspend fun savePushToken(pushToken: PushToken)
 }
 class DatabaseRepository @Inject constructor(private val playerDao: PlayerDao,
-                                             private val achievementDao: AchievementDao): DatabaseRepositoryInterface {
+                                             private val achievementDao: AchievementDao,
+                                             private val pushTokenDao: PushTokenDao
+    ): DatabaseRepositoryInterface {
+
+    //region Player
     override suspend fun getPlayers(): List<Player> {
         return playerDao.getAll()
     }
@@ -30,7 +37,9 @@ class DatabaseRepository @Inject constructor(private val playerDao: PlayerDao,
     override suspend fun insertPlayer(player: Player): Long {
         return playerDao.insertPlayer(player = player)
     }
+    //endregion
 
+    //region achievements
     override suspend fun getAllAchievements() : List<Achievement> {
         return achievementDao.getAll()
     }
@@ -54,4 +63,11 @@ class DatabaseRepository @Inject constructor(private val playerDao: PlayerDao,
     override suspend fun completeAchievement(achievement: Achievement) {
         achievementDao.setAchievementCompleted(true, achievement.id)
     }
+    //endregion
+
+    //region push_token
+    override suspend fun savePushToken(pushToken: PushToken) {
+        return pushTokenDao.savePushToken(pushToken = pushToken)
+    }
+    //endregion
 }
