@@ -73,8 +73,6 @@ fun GameView(viewModel: AchievementsViewModel? = null) {
                 GameCardView(achievement = it.get(i), viewModel = viewModel)
             }
         }
-
-        
     }
 }
 

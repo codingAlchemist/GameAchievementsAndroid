@@ -5,6 +5,7 @@ import androidx.room.Room
 import com.example.gameachievements.dao.AchievementDao
 import com.example.gameachievements.dao.PlayerDao
 import com.example.gameachievements.dao.PushTokenDao
+import com.example.gameachievements.dao.UserDao
 import com.example.gameachievements.database.AchievementsDatabase
 import dagger.Module
 import dagger.Provides
@@ -40,4 +41,8 @@ class DatabaseModule {
         return achievementsDatabase.pushTokenDao()
     }
 
+    @Provides
+    fun providesUserDao(achievementsDatabase: AchievementsDatabase): UserDao {
+        return achievementsDatabase.userDao()
+    }
 }

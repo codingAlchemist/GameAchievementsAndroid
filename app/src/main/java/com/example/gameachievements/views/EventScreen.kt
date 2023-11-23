@@ -31,12 +31,12 @@ import com.example.gameachievements.viewmodels.AchievementsViewModel
 @Composable
 fun EventScreen(viewModel: AchievementsViewModel? = null, onSubmit: ()->Unit) {
     val eventCode = remember{ mutableStateOf(TextFieldValue()) }
-//    AppImage(
-//        modifier = Modifier
-//            .fillMaxWidth()
-//            .fillMaxHeight(),
-//        resource = R.drawable.azynoriin_by_ondrejhrdina_d5gor9v
-//    )
+    AppImage(
+        modifier = Modifier
+            .fillMaxWidth()
+            .fillMaxHeight(),
+        resource = R.drawable.azynoriin_by_ondrejhrdina_d5gor9v
+    )
     Column(modifier =  Modifier
         .fillMaxSize(),
         horizontalAlignment = Alignment.CenterHorizontally,

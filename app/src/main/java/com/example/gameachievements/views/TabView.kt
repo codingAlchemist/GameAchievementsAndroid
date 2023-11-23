@@ -1,24 +1,17 @@
 package com.example.gameachievements.views
 
-import androidx.annotation.DrawableRes
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
-import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -30,10 +23,8 @@ import androidx.compose.ui.unit.ExperimentalUnitApi
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
-import androidx.navigation.NavHost
 import androidx.navigation.NavHostController
 import com.example.gameachievements.R
-import com.example.gameachievements.nav.NavRoute
 import com.example.gameachievements.ui.theme.GameAchievementsTheme
 import com.example.gameachievements.viewmodels.AchievementsViewModel
 import com.google.accompanist.pager.ExperimentalPagerApi
@@ -63,12 +54,10 @@ fun MainTabView(navHostController: NavHostController? = null, achievementsViewMo
             // on below line we are specifying a column
             // for our text view to display a text
             // in our top app bar.
-            Column(
-                modifier = Modifier.fillMaxSize(),
+            Row(
+                modifier = Modifier.fillMaxSize()
                 // on below line we are providing alignment for our
                 // column to center of our top app bar.
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
             ) {
                 // on below line we are specifying a text and
                 // specifying a text as "Tab Layout Example"
@@ -82,11 +71,18 @@ fun MainTabView(navHostController: NavHostController? = null, achievementsViewMo
                     ),
                     // on below line we are specifying a modifier
                     // to our text and adding passing from all sides.
-                    modifier = Modifier.padding(all = Dp(5F)),
+                    modifier = Modifier
+                        .padding(all = Dp(5F))
+                        .weight(.6f),
                     // on below line we are aligning
                     // our text to center.
                     textAlign = TextAlign.Center
                 )
+                Spacer(modifier = Modifier.weight(.3f))
+                Button(onClick = {}, modifier = Modifier.weight(.2f)) {
+                    Text(text = "Test")
+                    
+                }
             }
         }
         // on below line we are calling tabs
@@ -198,7 +194,7 @@ fun TabsContent(pagerState: PagerState, navHostController: NavHostController, ac
             1 -> EventScreen {
 
             }
-            2 -> TabContentScreen(data = "Profile")
+            2 -> ProfileScreen(data = "Profile")
         }
     }
 }
@@ -206,7 +202,7 @@ fun TabsContent(pagerState: PagerState, navHostController: NavHostController, ac
 // on below line we are creating a Tab Content
 // Screen for displaying a simple text message.
 @Composable
-fun TabContentScreen(data: String) {
+fun ProfileScreen(data: String) {
     // on below line we are creating a column
     Column(
         // in this column we are specifying modifier

@@ -1,10 +1,13 @@
 package com.example.gameachievements.di
 
+import androidx.room.util.query
 import com.example.gameachievements.dao.AchievementDao
 import com.example.gameachievements.dao.PlayerDao
 import com.example.gameachievements.dao.PushTokenDao
+import com.example.gameachievements.dao.UserDao
 import com.example.gameachievements.models.Player
 import com.example.gameachievements.models.PushToken
+import com.example.gameachievements.models.User
 import com.example.mtgcommanderachievements.models.Achievement
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flow
@@ -16,18 +19,42 @@ import javax.inject.Inject
 interface DatabaseRepositoryInterface {
     suspend fun getPlayers(): List<Player>
     suspend fun insertPlayer(player: Player): Long
-    suspend fun getAllAchievements() : List<Achievement>
+    suspend fun deleteAllPlayers()
+    suspend fun getAllAchievements(): List<Achievement>
     suspend fun insertAchievement(achievement: Achievement): Long
     suspend fun deleteAchievement(achievement: Achievement)
+    suspend fun delete(player: Player)
     suspend fun deleteAllAchievements()
     suspend fun getAchievement(achievement: Achievement)
     suspend fun completeAchievement(achievement: Achievement)
     suspend fun savePushToken(pushToken: PushToken)
+    suspend fun getPushToken(): PushToken
+    suspend fun getUser(): User
+    suspend fun saveUser(user: User)
+    suspend fun removeUser(user: User)
 }
-class DatabaseRepository @Inject constructor(private val playerDao: PlayerDao,
-                                             private val achievementDao: AchievementDao,
-                                             private val pushTokenDao: PushTokenDao
-    ): DatabaseRepositoryInterface {
+
+class DatabaseRepository @Inject constructor(
+    private val playerDao: PlayerDao,
+    private val achievementDao: AchievementDao,
+    private val pushTokenDao: PushTokenDao,
+    private val userDao: UserDao
+
+) : DatabaseRepositoryInterface {
+
+    // region User
+    override suspend fun getUser(): User {
+        return userDao.getUser().last()
+    }
+
+    override suspend fun saveUser(user: User) {
+        return userDao.insertUser(user = user)
+    }
+
+    override suspend fun removeUser(user: User) {
+       return userDao.deleteUser(user = user)
+    }
+    //endregion
 
     //region Player
     override suspend fun getPlayers(): List<Player> {
@@ -37,10 +64,20 @@ class DatabaseRepository @Inject constructor(private val playerDao: PlayerDao,
     override suspend fun insertPlayer(player: Player): Long {
         return playerDao.insertPlayer(player = player)
     }
+
+    override suspend fun delete(player: Player) {
+        return playerDao.delete(player = player)
+    }
+
+    override suspend fun deleteAllPlayers() {
+        return playerDao.deleteAllPlayers()
+    }
+
+
     //endregion
 
     //region achievements
-    override suspend fun getAllAchievements() : List<Achievement> {
+    override suspend fun getAllAchievements(): List<Achievement> {
         return achievementDao.getAll()
     }
 
@@ -68,6 +105,10 @@ class DatabaseRepository @Inject constructor(private val playerDao: PlayerDao,
     //region push_token
     override suspend fun savePushToken(pushToken: PushToken) {
         return pushTokenDao.savePushToken(pushToken = pushToken)
+    }
+
+    override suspend fun getPushToken(): PushToken {
+        return pushTokenDao.getToken().last()
     }
     //endregion
 }

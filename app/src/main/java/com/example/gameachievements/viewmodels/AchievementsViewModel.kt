@@ -1,6 +1,11 @@
 package com.example.gameachievements.viewmodels
 
 import android.util.Log
+import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateListOf
+import androidx.compose.runtime.snapshots.SnapshotStateList
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.gameachievements.api.requests.CompleteAchievementRequest
@@ -33,9 +38,11 @@ interface AchievementsViewModelInterface {
     fun completeAchievement(achievement: Achievement): Job
     fun createGame(gameRequest: GameRequest)
     fun saveFCM(pushToken: PushToken)
+    suspend fun getCurrentPushToken(): PushToken
 }
 @HiltViewModel
 class AchievementsViewModel @Inject constructor(private val repository: NetworkRepository, private val databaseRepo: DatabaseRepository): ViewModel(),AchievementsViewModelInterface {
+    var gamePlayers = mutableStateListOf<Player>()
     private val player: MutableStateFlow<Player> = MutableStateFlow(Player(
         0,
         "",
@@ -66,13 +73,30 @@ class AchievementsViewModel @Inject constructor(private val repository: NetworkR
         listOf(Achievement(0, "", "",0,false, reward = ""))
     )
     val _achievements:StateFlow<List<Achievement>> = achievements
+
+    val joinedPlayers: MutableLiveData<SnapshotStateList<Player>> = MutableLiveData()
+    val _joinedPlayers: LiveData<SnapshotStateList<Player>> = joinedPlayers
+
+    val pushToken: MutableStateFlow<PushToken> = MutableStateFlow(PushToken(0,"",""))
+    val _pushToken: StateFlow<PushToken> = pushToken
+    fun addPlayerToGame(player: Player) {
+        viewModelScope.launch(Dispatchers.IO) {
+            gamePlayers.add(player)
+            joinedPlayers.postValue(gamePlayers)
+        }
+    }
     override fun loginPlayer(userName: String, password: String) {
-        viewModelScope.launch {
+        viewModelScope.launch(Dispatchers.IO) {
+            databaseRepo.getPlayers().let {
+                it.forEach() {
+                    databaseRepo.delete(it)
+                }
+            }
             repository.loginPlayer(LoginModel(username = userName, password = password)).collect { result ->
                 viewModelScope.launch {
                     result.data.let {playerData ->
                         playerData?.let {
-                            val result = databaseRepo.insertPlayer(player = it!!)
+                            val result = databaseRepo.insertPlayer(player = it)
                             Log.d("","")
                         }
                         databaseRepo.getPlayers().let {
@@ -81,10 +105,8 @@ class AchievementsViewModel @Inject constructor(private val repository: NetworkR
                         player.emit(playerData!!)
                     }
                 }
-
             }
         }
-
     }
 
     override fun signUpPlayer(playerIn: Player)  {
@@ -93,14 +115,13 @@ class AchievementsViewModel @Inject constructor(private val repository: NetworkR
                 player.emit(result.data!!)
             }
         }
-
     }
 
     suspend fun getLoggedInPlayer(): Player = withContext(Dispatchers.IO){
         //var player: Player? = null
         databaseRepo.getPlayers().let {
             if (it.isNotEmpty()){
-                it.first().let { result ->
+                it.last().let { result ->
                     player.value = result
                 }
             }
@@ -178,13 +199,20 @@ class AchievementsViewModel @Inject constructor(private val repository: NetworkR
         }
     }
 
-    override fun saveFCM(pushToken: PushToken) {
+    override suspend fun getCurrentPushToken(): PushToken = withContext(Dispatchers.IO) {
+        databaseRepo.getPushToken().let {
+            pushToken.value = it
+        }
+        return@withContext pushToken.value
+
+    }
+    override fun saveFCM(pushTokenIn: PushToken) {
         viewModelScope.launch(Dispatchers.IO) {
             async {
-                repository.sendFCMToken(pushToken = pushToken).collect{ result ->
+                repository.sendFCMToken(pushToken = pushTokenIn).collect{ result ->
                     result.data?.let {
                         Log.d("","${it.fcm}")
-                        databaseRepo.savePushToken(pushToken = pushToken)
+                        databaseRepo.savePushToken(pushToken = pushTokenIn)
                     }
                 }
             }
@@ -192,5 +220,9 @@ class AchievementsViewModel @Inject constructor(private val repository: NetworkR
     }
 
 
-
+}
+object Players {
+    val playersJoined: MutableLiveData<ArrayList<Player>> by lazy {
+        MutableLiveData<ArrayList<Player>>()
+    }
 }

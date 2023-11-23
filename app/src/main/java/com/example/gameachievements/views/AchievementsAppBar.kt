@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.os.PersistableBundle
 import androidx.activity.ComponentActivity
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -20,6 +21,11 @@ class AchievementsAppBarMain: ComponentActivity() {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AchievementsAppBar(){
-    TopAppBar(title = { Text(text = stringResource(id = R.string.app_title)) })
+    TopAppBar(title = { Text(text = stringResource(id = R.string.app_title)) },
+        navigationIcon = {
+            IconButton(onClick = {  }) {
+
+            }
+        })
 }
 

@@ -22,13 +22,20 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.core.content.ContextCompat
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleObserver
+import androidx.lifecycle.Observer
+import androidx.lifecycle.asFlow
 import androidx.navigation.compose.rememberNavController
 import com.example.gameachievements.models.PushToken
 import com.example.gameachievements.nav.NavGraph
 import com.example.gameachievements.viewmodels.AchievementsViewModel
+import com.example.gameachievements.viewmodels.Players
 import com.google.android.gms.tasks.OnCompleteListener
 import com.google.firebase.messaging.FirebaseMessaging
 import dagger.hilt.android.AndroidEntryPoint
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -84,8 +91,18 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        askNotificationPermission()
-        registerToken()
+
+        GlobalScope.launch(Dispatchers.IO) {
+            Players.playersJoined.asFlow().collect{
+                viewModel.addPlayerToGame(it.last())
+            }
+            if (viewModel.getCurrentPushToken().fcm.isBlank()) {
+                askNotificationPermission()
+                registerToken()
+            }
+        }
+
+
         setContent {
             GameAchievementsTheme {
                 val navController = rememberNavController()
