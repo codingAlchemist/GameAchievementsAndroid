@@ -1,7 +1,6 @@
 package com.example.gameachievements.viewmodels
 
 import android.util.Log
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.LiveData
@@ -10,6 +9,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.gameachievements.api.requests.CompleteAchievementRequest
 import com.example.gameachievements.api.requests.GameRequest
+import com.example.gameachievements.api.requests.JoinGameRequest
 import com.example.gameachievements.di.DatabaseRepository
 import com.example.gameachievements.di.NetworkRepository
 import com.example.gameachievements.models.Game
@@ -17,16 +17,15 @@ import com.example.gameachievements.models.LoginModel
 import com.example.mtgcommanderachievements.models.Achievement
 import com.example.gameachievements.models.Player
 import com.example.gameachievements.models.PushToken
+import com.example.gameachievements.models.User
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import java.util.Date
 import javax.inject.Inject
 interface AchievementsViewModelInterface {
     fun loginPlayer(userName: String, password: String)
@@ -39,33 +38,29 @@ interface AchievementsViewModelInterface {
     fun createGame(gameRequest: GameRequest)
     fun saveFCM(pushToken: PushToken)
     suspend fun getCurrentPushToken(): PushToken
+    suspend fun joinGame(gameCode: String)
 }
 @HiltViewModel
 class AchievementsViewModel @Inject constructor(private val repository: NetworkRepository, private val databaseRepo: DatabaseRepository): ViewModel(),AchievementsViewModelInterface {
     var gamePlayers = mutableStateListOf<Player>()
-    private val player: MutableStateFlow<Player> = MutableStateFlow(Player(
+    private val user: MutableStateFlow<User> = MutableStateFlow(User(
         0,
         "",
         "",
         "",
-        0,
-        0,
         "",
-        0,
-        0,
-        false,
-        false
+        level = "0"
     ))
-    val _player: StateFlow<Player> = player
+    val _user: StateFlow<User> = user
 
     private val game: MutableStateFlow<Game> = MutableStateFlow(Game(
         0,
         0,
         0,
         "",
-        Date(),
-        Date(),
-        Date(),
+        "",
+        "",
+        "",
         "" ))
     val _game:StateFlow<Game> = game
 
@@ -79,6 +74,10 @@ class AchievementsViewModel @Inject constructor(private val repository: NetworkR
 
     val pushToken: MutableStateFlow<PushToken> = MutableStateFlow(PushToken(0,"",""))
     val _pushToken: StateFlow<PushToken> = pushToken
+
+    val gameJoinMessage: MutableStateFlow<String> = MutableStateFlow("")
+    val _gameJoinMessage: MutableStateFlow<String> = gameJoinMessage
+
     fun addPlayerToGame(player: Player) {
         viewModelScope.launch(Dispatchers.IO) {
             gamePlayers.add(player)
@@ -96,39 +95,42 @@ class AchievementsViewModel @Inject constructor(private val repository: NetworkR
                 viewModelScope.launch {
                     result.data.let {playerData ->
                         playerData?.let {
-                            val result = databaseRepo.insertPlayer(player = it)
-                            Log.d("","")
+                            val loggedInUser = User(it.id, it?.username ?: "", it.password ?: "", it.desc ?: "", it.email ?: "", "${it.level!!}")
+                            databaseRepo.saveUser(loggedInUser)
+                            databaseRepo.getUser().let { value ->
+                                user.emit(value)
+                            }
                         }
-                        databaseRepo.getPlayers().let {
-                            Log.d("","${it.count()}")
-                        }
-                        player.emit(playerData!!)
+
                     }
                 }
             }
         }
     }
 
+    fun logOut() {
+        viewModelScope.launch {
+            databaseRepo.removeUser()
+        }
+    }
     override fun signUpPlayer(playerIn: Player)  {
         viewModelScope.launch {
             repository.signUpPlayer(playerIn).collect { result ->
-                player.emit(result.data!!)
+                val newUser = User(result?.data?.id!!, result?.data?.username!!, result?.data?.password!!, result?.data?.desc!!, result?.data?.email!!, "${result?.data?.level!!}")
+                databaseRepo.saveUser(newUser)
+                user.emit(newUser)
             }
         }
     }
 
-    suspend fun getLoggedInPlayer(): Player = withContext(Dispatchers.IO){
-        //var player: Player? = null
-        databaseRepo.getPlayers().let {
-            if (it.isNotEmpty()){
-                it.last().let { result ->
-                    player.value = result
-                }
-            }
+    suspend fun getLoggedInUser(): User? = withContext(Dispatchers.IO) {
+        var currentUser: User? = null
+        databaseRepo.getUser().let {
+            user.value = it
+            currentUser = it
         }
-        return@withContext player.value
+        return@withContext user.value
     }
-
     override fun getAllAchievementsFromNetwork() {
         viewModelScope.launch {
             repository.getAchievements().collect { result ->
@@ -199,6 +201,19 @@ class AchievementsViewModel @Inject constructor(private val repository: NetworkR
         }
     }
 
+    override suspend fun joinGame(gameCode: String) {
+        val user = databaseRepo.getUser()
+        val game = databaseRepo.getGameWithGameCode(gameCode)
+        if (game.gameCode != null && user.id != null) {
+            val joinGameRequest = JoinGameRequest(user.id, game.gameCode,user.username, user.level)
+            repository.joinGame(joinGameRequest).collect {
+                it.message?.let {
+                    gameJoinMessage.emit(it)
+                }
+            }
+
+        }
+    }
     override suspend fun getCurrentPushToken(): PushToken = withContext(Dispatchers.IO) {
         databaseRepo.getPushToken().let {
             pushToken.value = it

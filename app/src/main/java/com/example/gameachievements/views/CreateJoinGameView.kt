@@ -1,24 +1,21 @@
 package com.example.gameachievements.views
 
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
-import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LocalTextStyle
-import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
@@ -26,11 +23,12 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.colorResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.TextStyle
@@ -42,21 +40,23 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.example.gameachievements.R
 import com.example.gameachievements.api.requests.GameRequest
-import com.example.gameachievements.models.Game
 import com.example.gameachievements.models.Player
 import com.example.gameachievements.ui.theme.GameAchievementsTheme
 import com.example.gameachievements.viewmodels.AchievementsViewModel
-import com.example.gameachievements.viewmodels.Players
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreateGameScreen(achievementsViewModel: AchievementsViewModel? = null) {
-
+fun CreateJoinGameView(achievementsViewModel: AchievementsViewModel? = null) {
     val game = achievementsViewModel?._game?.collectAsState()
-
+    val context = LocalContext.current
     val gameCode = remember {
-        mutableStateOf(game?.value?.gameCode)
+        mutableStateOf(TextFieldValue())
     }
+
+    val gameJoinMessage = achievementsViewModel?.gameJoinMessage?.collectAsState()
     AppImage(
         modifier = Modifier
             .fillMaxWidth()
@@ -64,49 +64,53 @@ fun CreateGameScreen(achievementsViewModel: AchievementsViewModel? = null) {
         resource = R.drawable.azynoriin_by_ondrejhrdina_d5gor9v
     )
 
-    Column(modifier =  Modifier
-        .fillMaxSize(),
+    Column(
+        modifier = Modifier
+            .width(300.dp)
+            .height(400.dp)
+            .background(Color.White)
+            .padding(5.dp)
+            .clip(RoundedCornerShape(15.dp)),
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {
-        Spacer(modifier = Modifier.height(20.dp))
-        Text(stringResource(R.string.event_code), color = colorResource(id = R.color.white))
-        Spacer(modifier = Modifier.height(20.dp))
-        Row {
-            Button(onClick = {
-                val gameRequest = GameRequest(event_id = 0, player_id = achievementsViewModel?._player?.value?.id!!)
-                achievementsViewModel.createGame(gameRequest)
-            }, shape = RoundedCornerShape(10.dp),
-                elevation = ButtonDefaults.buttonElevation(5.dp)) {
-                Text(stringResource(R.string.create_game), fontSize = 13.sp)
-
-            }
-            Spacer(modifier = Modifier.weight(1f))
-            Button(onClick = {
-
-            }, shape = RoundedCornerShape(10.dp),
-                elevation = ButtonDefaults.buttonElevation(5.dp)) {
-                Text(stringResource(R.string.create_game), fontSize = 13.sp)
-
-            }
-        }
-        Button(onClick = {
-            val gameRequest = GameRequest(event_id = 0, player_id = achievementsViewModel?._player?.value?.id!!)
-            achievementsViewModel.createGame(gameRequest)
-        }, shape = RoundedCornerShape(10.dp), elevation = ButtonDefaults.buttonElevation(5.dp)) {
-            Text(stringResource(R.string.create_game), fontSize = 13.sp)
-
-        }
-        Spacer(modifier = Modifier.height(20.dp))
         TextField(modifier = Modifier
-            .width(200.dp)
+            .fillMaxWidth()
             .height(50.dp),
             onValueChange = {
-                            gameCode.value = it
+                gameCode.value = it
             },
             textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center),
-            value = game?.value?.gameCode!!,
+            value = gameCode.value,
             singleLine = true)
-        playersJoinedView(achievementsViewModel)
+        Button(onClick = {
+            GlobalScope.launch(Dispatchers.IO) {
+                gameCode.value?.let {
+                    achievementsViewModel?.joinGame(it.text)
+                }
+                if (gameJoinMessage?.value?.isNotEmpty()!!) {
+                    Toast.makeText(context, "You join game", Toast.LENGTH_LONG).show()
+                }
+            }
+        }, shape = RoundedCornerShape(10.dp),
+            elevation = ButtonDefaults.buttonElevation(5.dp),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(30.dp)) {
+            Text(stringResource(R.string.join_game), fontSize = 13.sp)
+        }
+        Text(text = game?.value?.gameCode!!, color = colorResource(id = R.color.white), modifier = Modifier
+            .height(30.dp)
+            .weight(1f))
+        Button(onClick = {
+            val gameRequest = GameRequest(event_id = 0, player_id = achievementsViewModel?._user?.value?.id!!)
+            achievementsViewModel.createGame(gameRequest)
+        }, shape = RoundedCornerShape(10.dp),
+            elevation = ButtonDefaults.buttonElevation(5.dp),
+            modifier = Modifier.height(30.dp)) {
+            Text(stringResource(R.string.create_game), fontSize = 13.sp)
+        }
+
+        playersJoinedView(achievementsViewModel!!)
     }
 }
 
@@ -142,6 +146,6 @@ fun playerRow(player: Player) {
 @Composable
 fun GameScreenPreview() {
     GameAchievementsTheme {
-        CreateGameScreen()
+        CreateJoinGameView()
     }
 }

@@ -96,12 +96,9 @@ class MainActivity : ComponentActivity() {
             Players.playersJoined.asFlow().collect{
                 viewModel.addPlayerToGame(it.last())
             }
-            if (viewModel.getCurrentPushToken().fcm.isBlank()) {
-                askNotificationPermission()
-                registerToken()
-            }
         }
-
+        askNotificationPermission()
+        registerToken()
 
         setContent {
             GameAchievementsTheme {

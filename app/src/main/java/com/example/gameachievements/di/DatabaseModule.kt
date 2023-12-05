@@ -3,6 +3,7 @@ package com.example.gameachievements.di
 import android.content.Context
 import androidx.room.Room
 import com.example.gameachievements.dao.AchievementDao
+import com.example.gameachievements.dao.GameDao
 import com.example.gameachievements.dao.PlayerDao
 import com.example.gameachievements.dao.PushTokenDao
 import com.example.gameachievements.dao.UserDao
@@ -44,5 +45,10 @@ class DatabaseModule {
     @Provides
     fun providesUserDao(achievementsDatabase: AchievementsDatabase): UserDao {
         return achievementsDatabase.userDao()
+    }
+
+    @Provides
+    fun providesGameDao(achievementsDatabase: AchievementsDatabase): GameDao {
+        return achievementsDatabase.gameDao()
     }
 }

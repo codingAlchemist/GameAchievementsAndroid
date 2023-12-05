@@ -13,9 +13,8 @@ import androidx.compose.runtime.remember
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
-import com.example.gameachievements.models.Player
 import com.example.gameachievements.viewmodels.AchievementsViewModel
-import com.example.gameachievements.views.CreateGameScreen
+import com.example.gameachievements.views.CreateJoinGameView
 import com.example.gameachievements.views.EventScreen
 import com.example.gameachievements.views.GameView
 import com.example.gameachievements.views.LoginScreen
@@ -33,8 +32,9 @@ import kotlinx.coroutines.launch
 fun NavGraph(navController: NavHostController, viewModel: AchievementsViewModel? = null) {
     val achievements: List<Achievement> by viewModel!!._achievements.collectAsState()
     var startDestination by remember { mutableStateOf(NavRoute.Login.path ) }
+    var user = viewModel!!._user.collectAsState()
     LaunchedEffect(key1 = "login"){
-        if (viewModel!!.getLoggedInPlayer().id > 0) {
+        if (viewModel?.getLoggedInUser()?.id!! > 0) {
             startDestination = NavRoute.MainTabView.path
         }
     }
@@ -55,9 +55,10 @@ fun NavGraph(navController: NavHostController, viewModel: AchievementsViewModel?
                     navController.navigate(NavRoute.SignUp.path)
             }, onLogin = {
                     GlobalScope.launch(Dispatchers.Main) {
-                        if (viewModel!!.getLoggedInPlayer() != null) {
+                        if (viewModel!!._user.value.id > 0) {
                             navController.navigate(NavRoute.MainTabView.path)
                             viewModel.getAllAchievementsFromNetwork()
+
                         }
                     }
 
@@ -84,7 +85,7 @@ fun NavGraph(navController: NavHostController, viewModel: AchievementsViewModel?
             GameView(viewModel = viewModel)
         }
         composable("createGameScreen") {
-            CreateGameScreen()
+            CreateJoinGameView()
         }
     }
 }

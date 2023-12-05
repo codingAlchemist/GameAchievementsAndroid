@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.TextUnitType
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.example.gameachievements.R
+import com.example.gameachievements.nav.NavRoute
 import com.example.gameachievements.ui.theme.GameAchievementsTheme
 import com.example.gameachievements.viewmodels.AchievementsViewModel
 import com.google.accompanist.pager.ExperimentalPagerApi
@@ -39,7 +40,10 @@ import kotlinx.coroutines.launch
 @OptIn(ExperimentalUnitApi::class)
 @ExperimentalPagerApi
 @Composable
-fun MainTabView(navHostController: NavHostController? = null, achievementsViewModel: AchievementsViewModel? = null) {
+fun MainTabView(
+    navHostController: NavHostController? = null,
+    achievementsViewModel: AchievementsViewModel? = null
+) {
 
     // on below line we are creating variable for pager state.
     val pagerState = rememberPagerState(pageCount = 3)
@@ -78,10 +82,13 @@ fun MainTabView(navHostController: NavHostController? = null, achievementsViewMo
                     // our text to center.
                     textAlign = TextAlign.Center
                 )
-                Spacer(modifier = Modifier.weight(.3f))
-                Button(onClick = {}, modifier = Modifier.weight(.2f)) {
-                    Text(text = "Test")
-                    
+                Spacer(modifier = Modifier.weight(.1f))
+                Button(onClick = {
+                    achievementsViewModel?.logOut()
+                    navHostController?.navigate(NavRoute.Login.path)
+                }, modifier = Modifier.weight(.3f)) {
+                    Text(text = "Logout")
+
                 }
             }
         }
@@ -89,7 +96,7 @@ fun MainTabView(navHostController: NavHostController? = null, achievementsViewMo
         Tabs(pagerState = pagerState)
         // on below line we are calling tabs content
         // for displaying our page for each tab layout
-        TabsContent(pagerState = pagerState, navHostController!!, achievementsViewModel!!)
+        TabsContent(pagerState = pagerState, achievementsViewModel!!)
     }
 }
 
@@ -178,7 +185,7 @@ fun Tabs(pagerState: PagerState) {
 // in which we will be displaying the individual page of our tab .
 @ExperimentalPagerApi
 @Composable
-fun TabsContent(pagerState: PagerState, navHostController: NavHostController, achievementsViewModel: AchievementsViewModel) {
+fun TabsContent(pagerState: PagerState, achievementsViewModel: AchievementsViewModel) {
     // on below line we are creating
     // horizontal pager for our tab layout.
     HorizontalPager(state = pagerState) {
@@ -188,12 +195,13 @@ fun TabsContent(pagerState: PagerState, navHostController: NavHostController, ac
         when (page) {
             // on below line we are calling tab content screen
             // and specifying data as Home Screen.
-            0 -> CreateGameScreen(achievementsViewModel)
+            0 -> CreateJoinGameView(achievementsViewModel)
             // on below line we are calling tab content screen
             // and specifying data as Shopping Screen.
             1 -> EventScreen {
 
             }
+
             2 -> ProfileScreen(data = "Profile")
         }
     }
@@ -234,7 +242,8 @@ fun ProfileScreen(data: String) {
 @OptIn(ExperimentalPagerApi::class)
 @Preview(
     showBackground = true,
-    device = Devices.NEXUS_6)
+    device = Devices.NEXUS_6
+)
 @Composable
 fun MainTabViewPreview() {
     GameAchievementsTheme {

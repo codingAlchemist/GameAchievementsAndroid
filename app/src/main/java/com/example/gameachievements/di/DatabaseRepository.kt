@@ -2,9 +2,11 @@ package com.example.gameachievements.di
 
 import androidx.room.util.query
 import com.example.gameachievements.dao.AchievementDao
+import com.example.gameachievements.dao.GameDao
 import com.example.gameachievements.dao.PlayerDao
 import com.example.gameachievements.dao.PushTokenDao
 import com.example.gameachievements.dao.UserDao
+import com.example.gameachievements.models.Game
 import com.example.gameachievements.models.Player
 import com.example.gameachievements.models.PushToken
 import com.example.gameachievements.models.User
@@ -31,14 +33,16 @@ interface DatabaseRepositoryInterface {
     suspend fun getPushToken(): PushToken
     suspend fun getUser(): User
     suspend fun saveUser(user: User)
-    suspend fun removeUser(user: User)
+    suspend fun removeUser()
+    suspend fun getGameWithGameCode(gameCode: String): Game
 }
 
 class DatabaseRepository @Inject constructor(
     private val playerDao: PlayerDao,
     private val achievementDao: AchievementDao,
     private val pushTokenDao: PushTokenDao,
-    private val userDao: UserDao
+    private val userDao: UserDao,
+    private val gameDao: GameDao
 
 ) : DatabaseRepositoryInterface {
 
@@ -51,9 +55,10 @@ class DatabaseRepository @Inject constructor(
         return userDao.insertUser(user = user)
     }
 
-    override suspend fun removeUser(user: User) {
-       return userDao.deleteUser(user = user)
+    override suspend fun removeUser() {
+       return userDao.deleteUser()
     }
+
     //endregion
 
     //region Player
@@ -111,4 +116,10 @@ class DatabaseRepository @Inject constructor(
         return pushTokenDao.getToken().last()
     }
     //endregion
+
+    // Game
+    override suspend fun getGameWithGameCode(gameCode: String): Game {
+        return gameDao.getGame(gameCode)
+    }
+    // endregion
 }

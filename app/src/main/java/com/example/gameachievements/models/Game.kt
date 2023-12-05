@@ -11,7 +11,7 @@ data class Game(
     @ColumnInfo("rounds") val rounds: Int,
     @ColumnInfo("event_id") val event_id: Int,
     @ColumnInfo("eventCode") val eventCode: String,
-    @ColumnInfo("timeStarted") val timeStarted: Date,
-    @ColumnInfo("timeEnded") val timeEnded: Date,
-    @ColumnInfo("datePlayed") val datePlayed: Date,
+    @ColumnInfo("timeStarted") val timeStarted: String,
+    @ColumnInfo("timeEnded") val timeEnded: String,
+    @ColumnInfo("datePlayed") val datePlayed: String,
     @ColumnInfo("gameCode") val gameCode: String)

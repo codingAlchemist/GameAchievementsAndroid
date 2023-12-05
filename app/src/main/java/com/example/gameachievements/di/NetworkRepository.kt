@@ -5,7 +5,9 @@ import com.example.gameachievements.api.BaseApiResponse
 import com.example.gameachievements.api.NetworkResult
 import com.example.gameachievements.api.requests.CompleteAchievementRequest
 import com.example.gameachievements.api.requests.GameRequest
+import com.example.gameachievements.api.requests.JoinGameRequest
 import com.example.gameachievements.api.responses.CompletedAchievementResponse
+import com.example.gameachievements.api.responses.JoinGameResponse
 import com.example.gameachievements.models.Game
 import com.example.gameachievements.models.LoginModel
 import com.example.mtgcommanderachievements.models.Achievement
@@ -25,6 +27,7 @@ interface NetworkRepositoryInterface {
     suspend fun signUpPlayer(player: Player): Flow<NetworkResult<Player>>
     suspend fun createGame(gameRequest: GameRequest): Flow<NetworkResult<Game>>
     suspend fun sendFCMToken(pushToken: PushToken): Flow<NetworkResult<PushToken>>
+    suspend fun joinGame(joinGameRequest: JoinGameRequest): Flow<NetworkResult<JoinGameResponse>>
 }
 class NetworkRepository @Inject constructor(private val achievementsService: AchievementsService):
     BaseApiResponse(), NetworkRepositoryInterface {
@@ -63,6 +66,12 @@ class NetworkRepository @Inject constructor(private val achievementsService: Ach
     override suspend fun sendFCMToken(pushToken: PushToken): Flow<NetworkResult<PushToken>> {
         return flow {
             emit( safeApiCall { achievementsService.sendFCMToken(pushToken = pushToken) })
+        }
+    }
+
+    override suspend fun joinGame(joinGameRequest: JoinGameRequest): Flow<NetworkResult<JoinGameResponse>> {
+        return flow {
+            emit( safeApiCall { achievementsService.joinGame(joinGameRequest) })
         }
     }
 }

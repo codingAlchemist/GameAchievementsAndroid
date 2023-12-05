@@ -46,6 +46,7 @@ import androidx.lifecycle.LifecycleOwner
 import androidx.lifecycle.Observer
 import com.example.gameachievements.R
 import com.example.gameachievements.models.Player
+import com.example.gameachievements.models.User
 import com.example.gameachievements.ui.theme.GameAchievementsTheme
 import com.example.gameachievements.viewmodels.AchievementsViewModel
 import kotlinx.coroutines.flow.flow
@@ -59,7 +60,7 @@ fun LoginScreen(viewModel: AchievementsViewModel? = null, onSignUp: () -> Unit, 
         mutableStateOf(TextFieldValue())
     }
 
-   val player:Player by viewModel!!._player.collectAsState()
+   val user: User by viewModel!!._user.collectAsState()
     AppImage(
         modifier = Modifier
             .fillMaxWidth()
@@ -99,9 +100,7 @@ fun LoginScreen(viewModel: AchievementsViewModel? = null, onSignUp: () -> Unit, 
                 Text(stringResource(R.string.sign_up))
             }
         }
-
     }
-
 }
 
 
