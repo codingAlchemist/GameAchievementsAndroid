@@ -28,6 +28,7 @@ interface NetworkRepositoryInterface {
     suspend fun createGame(gameRequest: GameRequest): Flow<NetworkResult<Game>>
     suspend fun sendFCMToken(pushToken: PushToken): Flow<NetworkResult<PushToken>>
     suspend fun joinGame(joinGameRequest: JoinGameRequest): Flow<NetworkResult<JoinGameResponse>>
+    suspend fun getGame(gameCode: String): Flow<NetworkResult<Game>>
 }
 class NetworkRepository @Inject constructor(private val achievementsService: AchievementsService):
     BaseApiResponse(), NetworkRepositoryInterface {
@@ -72,6 +73,12 @@ class NetworkRepository @Inject constructor(private val achievementsService: Ach
     override suspend fun joinGame(joinGameRequest: JoinGameRequest): Flow<NetworkResult<JoinGameResponse>> {
         return flow {
             emit( safeApiCall { achievementsService.joinGame(joinGameRequest) })
+        }
+    }
+
+    override suspend fun getGame(gameCode: String): Flow<NetworkResult<Game>> {
+        return flow {
+            emit( safeApiCall { achievementsService.getGame(gameCode) })
         }
     }
 }

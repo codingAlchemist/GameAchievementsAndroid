@@ -14,7 +14,7 @@ import javax.inject.Inject
 class PushNotificationService: FirebaseMessagingService() {
     override fun onMessageReceived(message: RemoteMessage) {
         super.onMessageReceived(message)
-        Players.playersJoined.postValue(arrayListOf(Player(0,message.data.get("username"),"","", message.data.get("level")!!.toInt(), 0,"",0,0,true,false)))
+        Players.playersJoined.postValue(arrayListOf(Player(0,message.data.get("username"),"","", message.data.get("level")!!.toInt(), 0,"",message.data.get("gameCode"),0,true,false)))
     }
 
     override fun onNewToken(token: String) {

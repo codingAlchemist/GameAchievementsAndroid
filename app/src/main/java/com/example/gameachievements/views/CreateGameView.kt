@@ -1,7 +1,7 @@
 package com.example.gameachievements.views
 
-import android.widget.Toast
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -15,9 +15,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.Text
-import androidx.compose.material3.TextField
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.livedata.observeAsState
@@ -43,64 +41,29 @@ import com.example.gameachievements.api.requests.GameRequest
 import com.example.gameachievements.models.Player
 import com.example.gameachievements.ui.theme.GameAchievementsTheme
 import com.example.gameachievements.viewmodels.AchievementsViewModel
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun CreateJoinGameView(achievementsViewModel: AchievementsViewModel? = null) {
-    val game = achievementsViewModel?._game?.collectAsState()
-    val context = LocalContext.current
-    val gameCode = remember {
-        mutableStateOf(TextFieldValue())
-    }
+fun CreateGameView(achievementsViewModel: AchievementsViewModel? = null) {
+    val game = achievementsViewModel?._game?.observeAsState()
 
-    val gameJoinMessage = achievementsViewModel?.gameJoinMessage?.collectAsState()
     AppImage(
         modifier = Modifier
             .fillMaxWidth()
             .fillMaxHeight(),
         resource = R.drawable.azynoriin_by_ondrejhrdina_d5gor9v
     )
-
     Column(
-        modifier = Modifier
-            .width(300.dp)
-            .height(400.dp)
-            .background(Color.White)
-            .padding(5.dp)
-            .clip(RoundedCornerShape(15.dp)),
+        modifier = Modifier.fillMaxWidth(),
         horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
     ) {
-        TextField(modifier = Modifier
-            .fillMaxWidth()
-            .height(50.dp),
-            onValueChange = {
-                gameCode.value = it
-            },
-            textStyle = LocalTextStyle.current.copy(textAlign = TextAlign.Center),
-            value = gameCode.value,
-            singleLine = true)
-        Button(onClick = {
-            GlobalScope.launch(Dispatchers.IO) {
-                gameCode.value?.let {
-                    achievementsViewModel?.joinGame(it.text)
-                }
-                if (gameJoinMessage?.value?.isNotEmpty()!!) {
-                    Toast.makeText(context, "You join game", Toast.LENGTH_LONG).show()
-                }
-            }
-        }, shape = RoundedCornerShape(10.dp),
-            elevation = ButtonDefaults.buttonElevation(5.dp),
+        Text(text = game?.value?.gameCode!!,
+            textAlign = TextAlign.Center,
+            color = colorResource(id = R.color.white),
             modifier = Modifier
-                .fillMaxWidth()
-                .height(30.dp)) {
-            Text(stringResource(R.string.join_game), fontSize = 13.sp)
-        }
-        Text(text = game?.value?.gameCode!!, color = colorResource(id = R.color.white), modifier = Modifier
-            .height(30.dp)
-            .weight(1f))
+                .height(30.dp)
+                .fillMaxWidth())
         Button(onClick = {
             val gameRequest = GameRequest(event_id = 0, player_id = achievementsViewModel?._user?.value?.id!!)
             achievementsViewModel.createGame(gameRequest)
@@ -110,7 +73,7 @@ fun CreateJoinGameView(achievementsViewModel: AchievementsViewModel? = null) {
             Text(stringResource(R.string.create_game), fontSize = 13.sp)
         }
 
-        playersJoinedView(achievementsViewModel!!)
+        playersJoinedView(achievementsViewModel)
     }
 }
 
@@ -121,7 +84,7 @@ fun playersJoinedView(viewModel: AchievementsViewModel) {
     Column {
         joined.value?.forEach {
             Spacer(modifier = Modifier.height(5.dp))
-            playerRow(player = Player(0,it.username,"","",0,20,"",0,0, true, false))
+            playerRow(player = Player(0,it.username,"","",0,20,"","",0, true, false))
         }
     }
 }
@@ -146,6 +109,6 @@ fun playerRow(player: Player) {
 @Composable
 fun GameScreenPreview() {
     GameAchievementsTheme {
-        CreateJoinGameView()
+        CreateGameView()
     }
 }

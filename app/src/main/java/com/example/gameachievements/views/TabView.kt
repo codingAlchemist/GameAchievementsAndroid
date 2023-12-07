@@ -4,6 +4,8 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Create
+import androidx.compose.material.icons.filled.Face
 import androidx.compose.material.icons.filled.Home
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.runtime.Composable
@@ -46,7 +48,7 @@ fun MainTabView(
 ) {
 
     // on below line we are creating variable for pager state.
-    val pagerState = rememberPagerState(pageCount = 3)
+    val pagerState = rememberPagerState(pageCount = 4)
     // on below line we are creating a column for our widgets.
     Column(
         // for column we are specifying modifier on below line.
@@ -109,7 +111,8 @@ fun Tabs(pagerState: PagerState) {
     // in this list we are specifying data as
     // name of the tab and the icon for it.
     val list = listOf(
-        "Games" to Icons.Default.Home,
+        "JoinGame" to Icons.Default.Face,
+        "CreateGame" to Icons.Default.Create,
         "Events" to ImageVector.vectorResource(id = R.drawable.baseline_event_24),
         "Profile" to Icons.Default.Settings
     )
@@ -195,14 +198,16 @@ fun TabsContent(pagerState: PagerState, achievementsViewModel: AchievementsViewM
         when (page) {
             // on below line we are calling tab content screen
             // and specifying data as Home Screen.
-            0 -> CreateJoinGameView(achievementsViewModel)
+            0 -> JoinGameView(achievementsViewModel)
             // on below line we are calling tab content screen
             // and specifying data as Shopping Screen.
-            1 -> EventScreen {
+            1 -> CreateGameView(achievementsViewModel)
+
+            2 -> EventScreen {
 
             }
 
-            2 -> ProfileScreen(data = "Profile")
+            3 -> ProfileScreen(data = "Profile")
         }
     }
 }

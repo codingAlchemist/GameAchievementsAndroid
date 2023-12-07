@@ -94,7 +94,7 @@ class MainActivity : ComponentActivity() {
 
         GlobalScope.launch(Dispatchers.IO) {
             Players.playersJoined.asFlow().collect{
-                viewModel.addPlayerToGame(it.last())
+                viewModel.addPlayerToGame(it.toList())
             }
         }
         askNotificationPermission()

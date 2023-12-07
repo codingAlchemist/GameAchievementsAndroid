@@ -10,6 +10,7 @@ import com.example.gameachievements.models.LoginModel
 import com.example.mtgcommanderachievements.models.Achievement
 import com.example.gameachievements.models.Player
 import com.example.gameachievements.models.PushToken
+import com.google.android.gms.common.internal.safeparcel.SafeParcelable.Param
 import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.GET
@@ -44,6 +45,9 @@ interface AchievementsService {
     //region Games
     @POST("games/create")
     suspend fun createGame(@Body gameRequest: GameRequest): Response<Game>
+
+    @GET("games/{gameCode}")
+    suspend fun getGame(@Path("gameCode") gameCode: String ): Response<Game>
     //endregion
 
     //region Push Notifications

@@ -35,6 +35,7 @@ interface DatabaseRepositoryInterface {
     suspend fun saveUser(user: User)
     suspend fun removeUser()
     suspend fun getGameWithGameCode(gameCode: String): Game
+    suspend fun insertGame(game: Game)
 }
 
 class DatabaseRepository @Inject constructor(
@@ -48,7 +49,11 @@ class DatabaseRepository @Inject constructor(
 
     // region User
     override suspend fun getUser(): User {
-        return userDao.getUser().last()
+        if (!userDao.getUser().isNullOrEmpty()){
+            return userDao.getUser().last()
+        } else {
+            return User(0,"","","","","")
+        }
     }
 
     override suspend fun saveUser(user: User) {
@@ -120,6 +125,14 @@ class DatabaseRepository @Inject constructor(
     // Game
     override suspend fun getGameWithGameCode(gameCode: String): Game {
         return gameDao.getGame(gameCode)
+    }
+
+    override suspend fun insertGame(game: Game) {
+        return gameDao.insertGame(game)
+    }
+
+    suspend fun getGames(): List<Game> {
+        return gameDao.getGames()
     }
     // endregion
 }

@@ -14,7 +14,6 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.gameachievements.viewmodels.AchievementsViewModel
-import com.example.gameachievements.views.CreateJoinGameView
 import com.example.gameachievements.views.EventScreen
 import com.example.gameachievements.views.GameView
 import com.example.gameachievements.views.LoginScreen
@@ -38,7 +37,6 @@ fun NavGraph(navController: NavHostController, viewModel: AchievementsViewModel?
             startDestination = NavRoute.MainTabView.path
         }
     }
-
     NavHost(
         navController = navController,
         startDestination = startDestination) {
@@ -83,9 +81,6 @@ fun NavGraph(navController: NavHostController, viewModel: AchievementsViewModel?
         }
         composable("gameView") {
             GameView(viewModel = viewModel)
-        }
-        composable("createGameScreen") {
-            CreateJoinGameView()
         }
     }
 }

@@ -13,7 +13,7 @@ import com.example.gameachievements.models.PushToken
 import com.example.gameachievements.models.User
 import com.example.mtgcommanderachievements.models.Achievement
 
-@Database(entities = [Player::class, Achievement::class, PushToken::class, User::class, Game::class], version = 9)
+@Database(entities = [Player::class, Achievement::class, PushToken::class, User::class, Game::class], version = 12)
 abstract class AchievementsDatabase: RoomDatabase() {
     abstract fun playerDao(): PlayerDao
     abstract fun achievementDao(): AchievementDao
